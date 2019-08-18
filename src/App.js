@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Axios from 'axios';
 import { Route, Link } from 'react-router-dom';
-
+import firebase, {googleProvider} from './firebase'
+import Upload from './pages/Upload';
 import Karyawan from './pages/Karyawan'
 
 
@@ -12,8 +13,17 @@ class App extends Component {
       movies: [],
       posts: [],
       users: [],
-      hospitals: []
+      hospitals: [],
+      loggedUser: null
     }
+  }
+  async login() {
+    const result = await firebase.auth().signInWithPopup(googleProvider);
+    this.setState({loggedUser: result.user});
+  }
+  async logout() {
+    await firebase.auth().signOut()
+    this.setState({loggedUser: null});
   }
   componentWillMount() {
     Axios
@@ -72,6 +82,17 @@ class App extends Component {
     }
     return (
       <div>
+        <p>
+          {this.state.loggedUser ? `Hi,
+          ${this.state.loggedUser.displayName}!` : 'Hi!'}
+        </p>
+        <button onClick={this.login.bind(this)}>
+          Login with Google
+        </button>
+        <button onClick={this.logout.bind(this)}>
+          Logout
+        </button>
+
         <h1>Ini Portofolio saya</h1>
         <ul>
           <li>
@@ -80,9 +101,13 @@ class App extends Component {
           <li>
             <Link exact to="/karyawan">Karyawan</Link>
           </li>
+          <li>
+            <Link to='/upload'>upload</Link>
+          </li>
         </ul>
 
         <Route path='/karyawan' component={Karyawan}/>
+        <Route path='/Upload' component={Upload}/>
 
         <h2>Movie List</h2>
         <ul>{renderMovieList(this.state.movies)}</ul>

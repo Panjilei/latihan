@@ -1,52 +1,61 @@
 import React, { Component } from 'react';
-import Axios from 'axios';
+import firebase from '../firebase'
 
 export default class Karyawan extends Component {
     constructor() {
         super()
         this.state = {
-            karyawan: []
+            karyawanList: []
         }
+        this.inputElement = null
     }
     componentWillMount() {
-        Axios 
-            .get('http://localhost:3001/karyawan')
-            .then((response) => {
-                this.setState({
-                    karyawan: response.data 
+        let karyawanRef = firebase.database().ref('karyawan').orderByKey().limitToLast(100)
+        karyawanRef.on("value", snapshot => {
+            // console.log('onValue', snapshot.val())
+            let values = snapshot.val() || {}
+            this.setState({
+                karyawanList: Object.keys(values).map(key =>{
+                    return {
+                        key: key,
+                        value: snapshot.val()[key]
+                    }
+                })
             })
         })
-}
-render() {
-    function renderKaryawan(karyawanList) {
-        return karyawanList.map(karyawan => {
-            return <tr key={karyawan.id}>
-                <td>{karyawan.id}</td>
-                <td>{karyawan.nama}</td>
-                <td>{karyawan.usia}</td>
-                <td>{karyawan.kota}</td>
-            </tr>
+    }
+    addKaryawan(e){
+        e.preventDefault();
+        console.log(this.inputElement.value)
+        firebase.database().ref('karyawan').push( this.inputElement.value );
+        this.inputElement.value = '';
+    }
+    deleteKaryawan(id){
+        console.log('karyawan/'+ id)
+        firebase.database().ref('karyawan/'+ id).remove();
+    }   
+    renderKaryawan(karyawanList) {
+        return karyawanList.map((karyawan, i) => {
+            return <li key={i}>
+                {karyawan.value}&nbsp;&nbsp;&nbsp;
+                <span onClick={e => this.deleteKaryawan(karyawan.key)}>x</span>
+            </li>
         })
     }
-    return (
-        <div>
-            <h1>
-                Ini Data Karyawan
-            </h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Nama</th>
-                        <th>Usia</th>
-                        <th>Kota</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {renderKaryawan(this.state.karyawan)}
-                </tbody>
-            </table>
-        </div>
-    )
+    render() {
+        return (
+            <div>
+                <h1>
+                    Ini Data Karyawan
+                </h1>
+                <form onSubmit={this.addKaryawan.bind(this)}>
+                    <input type="text" ref={e => this.inputElement = e}/>
+                    <input type="submit"/>
+                </form>
+                <ul>
+                    {this.renderKaryawan(this.state.karyawanList)}
+                </ul>    
+            </div>        
+        )
     }
 }
