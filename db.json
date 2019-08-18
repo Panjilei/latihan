@@ -1,0 +1,9 @@
+{
+    "karyawan":[    
+    {"id":1,"nama":"Andi","usia":25,"kota":"Jakarta"},    
+    {"id":2,"nama":"Budi","usia":27,"kota":"Yogya"},    
+    {"id":3,"nama":"Caca","usia":25,"kota":"Bandung"},    
+    {"id":4,"nama":"Dedi","usia":31,"kota":"Jakarta"},    
+    {"id":5,"nama":"Euis","usia":22,"kota":"Bandung"}
+    ]
+}
